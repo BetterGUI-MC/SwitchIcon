@@ -34,6 +34,9 @@ public class SwitchIcon extends Icon implements ParentIcon {
 
   public SwitchIcon(Icon original) {
     super(original);
+    if (original instanceof SwitchIcon) {
+      icons.addAll(((SwitchIcon) original).icons);
+    }
   }
 
   @Override
