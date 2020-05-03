@@ -57,7 +57,9 @@ public class Manager {
       configMap.computeIfAbsent(menu,
           s -> new PluginConfig(instance.getPlugin(), new File(instance.getDataFolder(), menu)));
       PluginConfig config = configMap.get(menu);
-      config.getConfig().set(switchIcon.getName(), switchIcon.getData());
+      String icon = switchIcon.getName();
+      switchIcon.getData().forEach(
+          (uuid, integer) -> config.getConfig().set(icon + "." + uuid.toString(), integer));
       config.saveConfig();
     });
   }

@@ -30,8 +30,6 @@ public class SwitchIcon extends Icon implements ParentIcon {
 
   public SwitchIcon(String name, Menu<?> menu) {
     super(name, menu);
-    Main.getManager().registerIcon(this);
-    loadData();
   }
 
   public SwitchIcon(Icon original) {
@@ -53,6 +51,8 @@ public class SwitchIcon extends Icon implements ParentIcon {
   @Override
   public void setFromSection(ConfigurationSection configurationSection) {
     setChildFromSection(getMenu(), configurationSection);
+    Main.getManager().registerIcon(this);
+    loadData();
   }
 
   @Override
