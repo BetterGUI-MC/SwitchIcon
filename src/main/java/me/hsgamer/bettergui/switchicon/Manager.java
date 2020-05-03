@@ -19,6 +19,7 @@ public class Manager {
 
   public Manager(Main main) {
     this.instance = main;
+    loadFile();
   }
 
   public void registerIcon(SwitchIcon icon) {
