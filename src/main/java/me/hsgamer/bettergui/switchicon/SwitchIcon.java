@@ -19,7 +19,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public class SwitchIcon extends Icon implements ParentIcon {
 
   private final List<Icon> icons = new ArrayList<>();
-  private final Map<UUID, Integer> currentIndexMap = new HashMap<>();
+  private Map<UUID, Integer> currentIndexMap = new HashMap<>();
   private final Consumer<InventoryClickEvent> nextIndexConsumer = e -> currentIndexMap
       .computeIfPresent(e.getWhoClicked().getUniqueId(), (uuid1, integer) -> {
         if (integer + 1 >= icons.size()) {
@@ -30,13 +30,24 @@ public class SwitchIcon extends Icon implements ParentIcon {
 
   public SwitchIcon(String name, Menu<?> menu) {
     super(name, menu);
+    Main.getManager().registerIcon(this);
+    loadData();
   }
 
   public SwitchIcon(Icon original) {
     super(original);
     if (original instanceof SwitchIcon) {
       icons.addAll(((SwitchIcon) original).icons);
+      currentIndexMap = ((SwitchIcon) original).currentIndexMap;
     }
+  }
+
+  public Map<UUID, Integer> getData() {
+    return currentIndexMap;
+  }
+
+  private void loadData() {
+    currentIndexMap.putAll(Main.getManager().getData(getMenu().getName(), getName()));
   }
 
   @Override
