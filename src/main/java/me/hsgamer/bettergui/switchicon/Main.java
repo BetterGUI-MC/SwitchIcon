@@ -13,7 +13,7 @@ public final class Main extends Addon {
 
   @Override
   public void onEnable() {
-    IconBuilder.register("switch", SwitchIcon.class);
+    IconBuilder.register(SwitchIcon::new, "switch");
     manager = new Manager(this);
   }
 
