@@ -45,7 +45,9 @@ public class SwitchButton implements WrappedButton {
     private void saveData() {
         PluginConfig config = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        currentIndexMap.forEach((uuid, integer) -> config.getConfig().set(hash + "." + uuid.toString(), integer));
+        FileConfiguration data = config.getConfig();
+        data.set(hash, null);
+        currentIndexMap.forEach((uuid, integer) -> data.set(hash + "." + uuid.toString(), integer));
         config.saveConfig();
     }
 
