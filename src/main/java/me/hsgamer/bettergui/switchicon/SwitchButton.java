@@ -34,19 +34,18 @@ public class SwitchButton implements WrappedButton {
     }
 
     private void loadData() {
-        Optional.ofNullable(Manager.get(menu))
-                .ifPresent(config -> {
-                    FileConfiguration data = config.getConfig();
-                    if (data.isConfigurationSection(name)) {
-                        ConfigurationSection section = data.getConfigurationSection(name);
-                        section.getKeys(false).forEach(s -> currentIndexMap.put(UUID.fromString(s), section.getInt(s)));
-                    }
-                });
+        FileConfiguration data = Manager.get(menu).getConfig();
+        String hash = String.valueOf(name.hashCode());
+        if (data.isConfigurationSection(hash)) {
+            ConfigurationSection section = data.getConfigurationSection(hash);
+            section.getKeys(false).forEach(s -> currentIndexMap.put(UUID.fromString(s), section.getInt(s)));
+        }
     }
 
     private void saveData() {
         PluginConfig config = Manager.get(menu);
-        currentIndexMap.forEach((uuid, integer) -> config.getConfig().set(name + "." + uuid.toString(), integer));
+        String hash = String.valueOf(name.hashCode());
+        currentIndexMap.forEach((uuid, integer) -> config.getConfig().set(hash + "." + uuid.toString(), integer));
         config.saveConfig();
     }
 
@@ -75,7 +74,7 @@ public class SwitchButton implements WrappedButton {
     public void handleAction(UUID uuid, InventoryClickEvent inventoryClickEvent) {
         currentIndexMap.putIfAbsent(uuid, 0);
         buttons.get(currentIndexMap.get(uuid)).handleAction(uuid, inventoryClickEvent);
-        currentIndexMap.computeIfPresent(uuid, (uuid1, integer) -> integer + 1 % buttons.size());
+        currentIndexMap.computeIfPresent(uuid, (uuid1, integer) -> (integer + 1) % buttons.size());
     }
 
     @Override
