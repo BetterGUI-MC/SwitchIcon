@@ -1,29 +1,30 @@
 package me.hsgamer.bettergui.switchicon;
 
-import me.hsgamer.bettergui.builder.IconBuilder;
-import me.hsgamer.bettergui.object.addon.Addon;
+import me.hsgamer.bettergui.api.addon.BetterGUIAddon;
+import me.hsgamer.bettergui.builder.ButtonBuilder;
 
-public final class Main extends Addon {
+public final class Main extends BetterGUIAddon {
 
-  private static Manager manager;
+    @Override
+    public boolean onLoad() {
+        Manager.setFolder(getDataFolder());
+        return true;
+    }
 
-  public static Manager getManager() {
-    return manager;
-  }
+    @Override
+    public void onEnable() {
+        ButtonBuilder.INSTANCE.register(SwitchButton::new, "switch");
+        Manager.load();
+    }
 
-  @Override
-  public void onEnable() {
-    IconBuilder.register(SwitchIcon::new, "switch");
-    manager = new Manager(this);
-  }
+    @Override
+    public void onReload() {
+        Manager.clear();
+        Manager.load();
+    }
 
-  @Override
-  public void onReload() {
-    manager.reloadFile();
-  }
-
-  @Override
-  public void onDisable() {
-    manager.saveData();
-  }
+    @Override
+    public void onDisable() {
+        Manager.clear();
+    }
 }
