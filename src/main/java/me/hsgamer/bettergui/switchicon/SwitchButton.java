@@ -3,12 +3,10 @@ package me.hsgamer.bettergui.switchicon;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
-import me.hsgamer.bettergui.lib.core.bukkit.config.PluginConfig;
-import me.hsgamer.bettergui.lib.core.bukkit.gui.Button;
+import me.hsgamer.bettergui.lib.core.bukkit.gui.button.Button;
 import me.hsgamer.bettergui.lib.core.collections.map.CaseInsensitiveStringHashMap;
+import me.hsgamer.bettergui.lib.core.config.Config;
 import me.hsgamer.bettergui.lib.core.ui.property.Initializable;
-import me.hsgamer.bettergui.lib.simpleyaml.configuration.ConfigurationSection;
-import me.hsgamer.bettergui.lib.simpleyaml.configuration.file.FileConfiguration;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,31 +22,29 @@ public class SwitchButton implements WrappedButton {
         this.menu = menu;
     }
 
-    @Override
-    public void setFromSection(ConfigurationSection configurationSection) {
-        Map<String, Object> keys = new CaseInsensitiveStringHashMap<>(configurationSection.getValues(false));
-        Optional.ofNullable(keys.get("child"))
-                .filter(o -> o instanceof ConfigurationSection)
-                .map(o -> (ConfigurationSection) o)
-                .ifPresent(subsection -> buttons.addAll(ButtonBuilder.INSTANCE.getChildButtons(this, subsection)));
-    }
-
     private void loadData() {
-        FileConfiguration data = Manager.get(menu).getConfig();
+        Config data = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        if (data.isConfigurationSection(hash)) {
-            ConfigurationSection section = data.getConfigurationSection(hash);
-            section.getKeys(false).forEach(s -> currentIndexMap.put(UUID.fromString(s), section.getInt(s)));
-        }
+        data.getNormalizedValues(hash, false)
+                .forEach((k, v) -> currentIndexMap.put(UUID.fromString(k), Integer.parseInt(String.valueOf(v))));
     }
 
     private void saveData() {
-        PluginConfig config = Manager.get(menu);
+        Config config = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        FileConfiguration data = config.getConfig();
-        data.set(hash, null);
-        currentIndexMap.forEach((uuid, integer) -> data.set(hash + "." + uuid.toString(), integer));
-        config.saveConfig();
+        config.remove(hash);
+        currentIndexMap.forEach((uuid, integer) -> config.set(hash + "." + uuid.toString(), integer));
+        config.save();
+    }
+
+    @Override
+    public void setFromSection(Map<String, Object> map) {
+        Map<String, Object> keys = new CaseInsensitiveStringHashMap<>(map);
+        Optional.ofNullable(keys.get("child"))
+                .filter(Map.class::isInstance)
+                .map(o -> (Map<String, Object>) o)
+                .map(o -> ButtonBuilder.INSTANCE.getChildButtons(this, o))
+                .ifPresent(buttons::addAll);
     }
 
     @Override
