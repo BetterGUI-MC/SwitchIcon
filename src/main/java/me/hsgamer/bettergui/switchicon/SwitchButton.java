@@ -3,10 +3,11 @@ package me.hsgamer.bettergui.switchicon;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
-import me.hsgamer.bettergui.lib.core.bukkit.gui.button.Button;
-import me.hsgamer.bettergui.lib.core.collections.map.CaseInsensitiveStringHashMap;
-import me.hsgamer.bettergui.lib.core.config.Config;
-import me.hsgamer.bettergui.lib.core.ui.property.Initializable;
+import me.hsgamer.bettergui.util.MapUtil;
+import me.hsgamer.hscore.bukkit.gui.button.Button;
+import me.hsgamer.hscore.collections.map.CaseInsensitiveStringHashMap;
+import me.hsgamer.hscore.config.Config;
+import me.hsgamer.hscore.ui.property.Initializable;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,10 +17,17 @@ public class SwitchButton implements WrappedButton {
     private final List<Button> buttons = new ArrayList<>();
     private final Map<UUID, Integer> currentIndexMap = new HashMap<>();
     private final Menu menu;
-    private String name;
+    private final String name;
 
-    public SwitchButton(Menu menu) {
-        this.menu = menu;
+    public SwitchButton(ButtonBuilder.Input input) {
+        this.menu = input.menu;
+        this.name = input.name;
+
+        Map<String, Object> keys = new CaseInsensitiveStringHashMap<>(input.options);
+        Optional.ofNullable(keys.get("child"))
+                .flatMap(MapUtil::castOptionalStringObjectMap)
+                .map(o -> ButtonBuilder.INSTANCE.getChildButtons(this, o))
+                .ifPresent(buttons::addAll);
     }
 
     private void loadData() {
@@ -38,23 +46,8 @@ public class SwitchButton implements WrappedButton {
     }
 
     @Override
-    public void setFromSection(Map<String, Object> map) {
-        Map<String, Object> keys = new CaseInsensitiveStringHashMap<>(map);
-        Optional.ofNullable(keys.get("child"))
-                .filter(Map.class::isInstance)
-                .map(o -> (Map<String, Object>) o)
-                .map(o -> ButtonBuilder.INSTANCE.getChildButtons(this, o))
-                .ifPresent(buttons::addAll);
-    }
-
-    @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override

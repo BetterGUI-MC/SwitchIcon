@@ -1,8 +1,8 @@
 package me.hsgamer.bettergui.switchicon;
 
 import me.hsgamer.bettergui.api.menu.Menu;
-import me.hsgamer.bettergui.lib.core.bukkit.config.BukkitConfig;
-import me.hsgamer.bettergui.lib.core.config.Config;
+import me.hsgamer.hscore.bukkit.config.BukkitConfig;
+import me.hsgamer.hscore.config.Config;
 
 import java.io.File;
 import java.util.HashMap;

@@ -1,9 +1,9 @@
 package me.hsgamer.bettergui.switchicon;
 
-import me.hsgamer.bettergui.api.addon.BetterGUIAddon;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
+import me.hsgamer.hscore.bukkit.addon.PluginAddon;
 
-public final class Main extends BetterGUIAddon {
+public final class Main extends PluginAddon {
 
     @Override
     public boolean onLoad() {
