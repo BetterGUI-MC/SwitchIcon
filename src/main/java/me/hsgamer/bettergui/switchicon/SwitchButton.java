@@ -4,12 +4,12 @@ import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.util.MapUtil;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringHashMap;
 import me.hsgamer.hscore.config.Config;
+import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.event.ClickEvent;
+import me.hsgamer.hscore.minecraft.gui.object.Item;
 import me.hsgamer.hscore.ui.property.Initializable;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
@@ -56,15 +56,16 @@ public class SwitchButton implements WrappedButton {
     }
 
     @Override
-    public ItemStack getItemStack(UUID uuid) {
+    public Item getItem(UUID uuid) {
         currentIndexMap.putIfAbsent(uuid, 0);
-        return buttons.get(currentIndexMap.get(uuid)).getItemStack(uuid);
+        return buttons.get(currentIndexMap.get(uuid)).getItem(uuid);
     }
 
     @Override
-    public void handleAction(UUID uuid, InventoryClickEvent inventoryClickEvent) {
+    public void handleAction(ClickEvent event) {
+        UUID uuid = event.getViewerID();
         currentIndexMap.putIfAbsent(uuid, 0);
-        buttons.get(currentIndexMap.get(uuid)).handleAction(uuid, inventoryClickEvent);
+        buttons.get(currentIndexMap.get(uuid)).handleAction(event);
         currentIndexMap.computeIfPresent(uuid, (uuid1, integer) -> (integer + 1) % buttons.size());
     }
 
