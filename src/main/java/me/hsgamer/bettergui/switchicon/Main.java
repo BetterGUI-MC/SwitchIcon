@@ -1,9 +1,11 @@
 package me.hsgamer.bettergui.switchicon;
 
+import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
-import me.hsgamer.hscore.bukkit.addon.PluginAddon;
+import me.hsgamer.hscore.expansion.common.Expansion;
+import me.hsgamer.hscore.expansion.extra.expansion.DataFolder;
 
-public final class Main extends PluginAddon {
+public final class Main implements Expansion, Reloadable, DataFolder {
 
     @Override
     public boolean onLoad() {

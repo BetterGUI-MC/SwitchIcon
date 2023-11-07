@@ -3,13 +3,15 @@ package me.hsgamer.bettergui.switchicon;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringHashMap;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.config.Config;
+import me.hsgamer.hscore.config.PathString;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.event.ClickEvent;
 import me.hsgamer.hscore.minecraft.gui.object.Item;
 import me.hsgamer.hscore.ui.property.Initializable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -25,7 +27,7 @@ public class SwitchButton implements WrappedButton {
 
         Map<String, Object> keys = new CaseInsensitiveStringHashMap<>(input.options);
         Optional.ofNullable(keys.get("child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .map(o -> ButtonBuilder.INSTANCE.getChildButtons(this, o))
                 .ifPresent(buttons::addAll);
     }
@@ -33,15 +35,15 @@ public class SwitchButton implements WrappedButton {
     private void loadData() {
         Config data = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        data.getNormalizedValues(hash, false)
-                .forEach((k, v) -> currentIndexMap.put(UUID.fromString(k), Integer.parseInt(String.valueOf(v))));
+        data.getNormalizedValues(new PathString(hash), false)
+                .forEach((k, v) -> currentIndexMap.put(UUID.fromString(PathString.toPath(k)), Integer.parseInt(String.valueOf(v))));
     }
 
     private void saveData() {
         Config config = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        config.remove(hash);
-        currentIndexMap.forEach((uuid, integer) -> config.set(hash + "." + uuid.toString(), integer));
+        config.remove(new PathString(hash));
+        currentIndexMap.forEach((uuid, integer) -> config.set(new PathString(hash, uuid.toString()), integer));
         config.save();
     }
 
@@ -56,7 +58,7 @@ public class SwitchButton implements WrappedButton {
     }
 
     @Override
-    public Item getItem(UUID uuid) {
+    public Item getItem(@NotNull UUID uuid) {
         currentIndexMap.putIfAbsent(uuid, 0);
         return buttons.get(currentIndexMap.get(uuid)).getItem(uuid);
     }
