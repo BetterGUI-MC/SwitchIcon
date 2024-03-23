@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>SwitchIcon</artifactId>
-  <version>6.0</version>
+  <version>6.1</version>
   <packaging>jar</packaging>
 
   <name>SwitchIcon</name>

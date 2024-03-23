@@ -20,6 +20,9 @@ public class Manager {
 
     public static void setFolder(File folder) {
         Manager.folder = folder;
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
     }
 
     public static void load() {
