@@ -6,14 +6,15 @@ import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringHashMap;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.config.Config;
-import me.hsgamer.hscore.config.PathString;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
-import me.hsgamer.hscore.minecraft.gui.event.ClickEvent;
-import me.hsgamer.hscore.minecraft.gui.object.Item;
+import me.hsgamer.hscore.minecraft.gui.button.DisplayButton;
+import me.hsgamer.hscore.minecraft.gui.event.ViewerEvent;
 import me.hsgamer.hscore.ui.property.Initializable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class SwitchButton implements WrappedButton {
     private final List<Button> buttons = new ArrayList<>();
@@ -35,15 +36,15 @@ public class SwitchButton implements WrappedButton {
     private void loadData() {
         Config data = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        data.getNormalizedValues(new PathString(hash), false)
-                .forEach((k, v) -> currentIndexMap.put(UUID.fromString(PathString.toPath(k)), Integer.parseInt(String.valueOf(v))));
+        data.getNormalizedValues(false, hash)
+                .forEach((k, v) -> currentIndexMap.put(UUID.fromString(k[0]), Integer.parseInt(String.valueOf(v))));
     }
 
     private void saveData() {
         Config config = Manager.get(menu);
         String hash = String.valueOf(name.hashCode());
-        config.remove(new PathString(hash));
-        currentIndexMap.forEach((uuid, integer) -> config.set(new PathString(hash, uuid.toString()), integer));
+        config.remove(hash);
+        currentIndexMap.forEach((uuid, integer) -> config.set(integer, hash, uuid.toString()));
         config.save();
     }
 
@@ -58,20 +59,6 @@ public class SwitchButton implements WrappedButton {
     }
 
     @Override
-    public Item getItem(@NotNull UUID uuid) {
-        currentIndexMap.putIfAbsent(uuid, 0);
-        return buttons.get(currentIndexMap.get(uuid)).getItem(uuid);
-    }
-
-    @Override
-    public void handleAction(ClickEvent event) {
-        UUID uuid = event.getViewerID();
-        currentIndexMap.putIfAbsent(uuid, 0);
-        buttons.get(currentIndexMap.get(uuid)).handleAction(event);
-        currentIndexMap.computeIfPresent(uuid, (uuid1, integer) -> (integer + 1) % buttons.size());
-    }
-
-    @Override
     public void init() {
         loadData();
         buttons.forEach(Initializable::init);
@@ -81,5 +68,19 @@ public class SwitchButton implements WrappedButton {
     public void stop() {
         saveData();
         buttons.forEach(Initializable::stop);
+    }
+
+    @Override
+    public @Nullable DisplayButton display(@NotNull UUID uuid) {
+        DisplayButton displayButton = new DisplayButton();
+        displayButton.apply(buttons.get(currentIndexMap.computeIfAbsent(uuid, uuid1 -> 0)).display(uuid));
+        Consumer<ViewerEvent> action = displayButton.getAction();
+        displayButton.setClickAction(event -> {
+            if (action != null) {
+                action.accept(event);
+            }
+            currentIndexMap.computeIfPresent(uuid, (uuid1, integer) -> (integer + 1) % buttons.size());
+        });
+        return displayButton;
     }
 }
